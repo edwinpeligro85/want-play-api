@@ -17,6 +17,7 @@ export const databaseProvider = [
         entities: [join(__dirname, '../**/**/*entity{.ts,.js}')],
         // migrations: [join(__dirname, '/migrations/*{.ts,.js}')],
         synchronize: !_config.get<boolean>(Config.PRODUCTION),
+        autoLoadEntities: true,
         useNewUrlParser: true,
         useUnifiedTopology: true,
         logging: ['error', 'schema', 'migration'],
