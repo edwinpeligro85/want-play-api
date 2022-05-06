@@ -1,78 +1,59 @@
 import { User } from '@modules/users/esquemas';
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly _user: UsersService) {}
+  constructor(private readonly _user: UsersService, private _jwt: JwtService) {}
 
-  async register(signUp: SignUpDto): Promise<User> {
+  async register(signUp: SignUpDto): Promise<Partial<User>> {
     const { name: firstName, ...res } = signUp;
-    const result = await this._user.create({ firstName, ...res });
-    let { password, ...user } = JSON.parse(JSON.stringify(result));
+    const { password, ...user } = (
+      await this._user.create({ firstName, ...res })
+    ).toObject();
 
     return user;
   }
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this._user.findOne(username);
-    if (user && user.password === pass) {
-      const { password, ...result } = user;
-      return result;
+  async validateUser(
+    email: string,
+    pwd: string,
+  ): Promise<{ user: Partial<User>; message: HttpException }> {
+    const user = await this._user.findOneByEmail(email, true);
+
+    if (!user) {
+      return {
+        user: null,
+        message: new HttpException('User not found', HttpStatus.UNAUTHORIZED),
+      };
     }
-    return null;
+
+    if (!(await bcrypt.compare(pwd, user.password))) {
+      return {
+        user: null,
+        message: new HttpException(
+          'Invalid credentials',
+          HttpStatus.UNAUTHORIZED,
+        ),
+      };
+    }
+
+    const { password, ...rest } = user.toObject();
+
+    return { user: rest, message: null };
   }
 
-  // async validateUser(
-  //   email: string,
-  //   pass: string,
-  // ): Promise<{ user: Partial<User>; message: HttpException }> {
-  //   const user = await this._user.findOneByEmail(email);
-
-  //   if (!user) {
-  //     return {
-  //       user: null,
-  //       message: new HttpException('User not found', HttpStatus.UNAUTHORIZED),
-  //     };
-  //   }
-
-  //   const areEqual = await compare(pass, user.password);
-
-  //   if (!areEqual) {
-  //     return {
-  //       user: null,
-  //       message: new HttpException(
-  //         'Invalid credentials',
-  //         HttpStatus.UNAUTHORIZED,
-  //       ),
-  //     };
-  //   }
-
-  //   const { password, ...result } = user;
-
-  //   return { user: result, message: null };
-  // }
-
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  async login(user: User): Promise<LoginResponseDto> {
+    return new LoginResponseDto(this.createToken(user), user);
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  createToken(user: User): string {
+    const payload: JwtPayload = { email: user.email, sub: user._id };
+    return this._jwt.sign(payload);
   }
 }

@@ -7,4 +7,6 @@ export default () => ({
     username: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
   },
+  jwtSecret: process.env.JWT_SECRET,
+  apiPrefix: process.env.API_PREFIX,
 });

@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-export type UserDocument = User & Document;
+// export type UserDocument = User & Document;
 
 @Schema()
-export class User {
+export class User extends Document {
   @Prop({ required: true })
   firstName: string;
 
@@ -22,6 +22,7 @@ export class User {
   password?: string;
 
   constructor(data: Partial<User> = {}) {
+    super();
     Object.assign(this, data);
   }
 

@@ -3,15 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './esquemas/user.schema';
+import { User } from './esquemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(data: Partial<User>): Promise<User> {
-    const createdUser = new this.userModel(data);
-    return createdUser.save();
+    return new this.userModel(data).save();
   }
 
   findAll(): Promise<User[]> {
@@ -30,7 +29,13 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  async findOneByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+  async findOneByEmail(email: string, password: boolean = false) {
+    const user = this.userModel.findOne({ email });
+
+    if (password) {
+      user.select('+password');
+    }
+
+    return user.exec();
   }
 }
