@@ -1,37 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectID } from 'mongodb';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User, UserDocument } from './esquemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private repo) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  private users = [
-    {
-      userId: new ObjectID(),
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: new ObjectID(),
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
-
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(data: Partial<User>): Promise<User> {
+    const createdUser = new this.userModel(data);
+    return createdUser.save();
   }
 
-  findAll() {
-    return `This action returns all users`;
+  findAll(): Promise<User[]> {
+    return this.userModel.find().exec();
   }
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+  async findOne(id: string): Promise<User | undefined> {
+    return this.userModel.findById(id).exec();
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -43,10 +31,6 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    return this.repo
-      .createQueryBuilder('user')
-      .where({ email })
-      .addSelect('user.password')
-      .getOne();
+    return this.userModel.findOne({ email }).exec();
   }
 }
