@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './esquemas/user.schema';
+import { User, UserDocument } from './esquemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async create(data: Partial<User>): Promise<User> {
+  async create(data: Partial<User>): Promise<UserDocument> {
     return new this.userModel(data).save();
   }
 

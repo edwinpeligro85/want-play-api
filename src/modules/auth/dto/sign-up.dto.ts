@@ -5,6 +5,7 @@ import {
   IsEmail,
   MinLength,
   Validate,
+  MaxLength,
 } from 'class-validator';
 
 export class SignUpDto {
@@ -12,13 +13,14 @@ export class SignUpDto {
   @IsNotEmpty()
   readonly name: string;
 
-  @IsDefined()
   @IsEmail()
-  // @Validate(IsUserAlreadyExist)
+  @MaxLength(255, { always: true })
+  @Validate(IsUserAlreadyExist)
   readonly email: string;
 
   @IsDefined()
   @IsNotEmpty()
-  @MinLength(8)
+  @MinLength(6)
+  @MaxLength(20)
   readonly password: string;
 }

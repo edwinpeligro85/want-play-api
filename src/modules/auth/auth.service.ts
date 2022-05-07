@@ -53,7 +53,7 @@ export class AuthService {
   }
 
   createToken(user: User): string {
-    const payload: JwtPayload = { email: user.email, sub: user._id };
+    const payload: JwtPayload = { email: user.email, sub: user.id };
     return this._jwt.sign(payload);
   }
 }

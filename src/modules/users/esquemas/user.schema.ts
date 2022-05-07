@@ -1,20 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { ApiProperty } from '@nestjs/swagger';
 
-// export type UserDocument = User & Document;
+export type UserDocument = User & Document;
 
 @Schema()
-export class User extends Document {
+export class User {
+  get id() {
+    return this['_id'];
+  }
+
+  @ApiProperty()
   @Prop({ required: true })
   firstName: string;
 
+  @ApiProperty()
   @Prop()
-  lastName: string;
+  lastName?: string;
 
   @Prop()
-  age: number;
+  age?: number;
 
+  @ApiProperty()
   @Prop({ required: true })
   email: string;
 
@@ -22,7 +30,6 @@ export class User extends Document {
   password?: string;
 
   constructor(data: Partial<User> = {}) {
-    super();
     Object.assign(this, data);
   }
 
@@ -42,7 +49,7 @@ export const UserSchemaProvider = {
         bcrypt.genSalt(10, function (err, salt) {
           if (err) return next(err);
 
-          bcrypt.hash(user.password, salt, (err, hash) => {
+          bcrypt.hash(user.password, salt, (_, hash) => {
             if (err) return next(err);
 
             user.password = hash;

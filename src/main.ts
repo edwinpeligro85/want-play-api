@@ -2,6 +2,7 @@ import { Config } from '@config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { initSwagger } from './app.swagger';
 import { initValiadtionPipe } from './app.validation';
@@ -25,6 +26,8 @@ async function bootstrap() {
     allowedHeaders: '*',
     credentials: false,
   });
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   await app.listen(_config.get(Config.PORT));
 

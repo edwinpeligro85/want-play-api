@@ -14,11 +14,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
-import { LoginDto } from './dto/login.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LoginDto, LoginResponseDto, SignUpDto } from './dto';
 import { LocalAuthGuard } from './guards';
 
 @ApiTags('Autenticación')
@@ -28,8 +24,8 @@ export class AuthController {
 
   @Post('register')
   // @UseInterceptors(TokenInterceptor)
-  register(@Body() signUp: SignUpDto): Promise<Partial<User>> {
-    return this._auth.register(signUp);
+  async register(@Body() signUp: SignUpDto): Promise<User> {
+    return this._auth.register(signUp) as any;
   }
 
   @Post('login')
