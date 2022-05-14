@@ -1,28 +1,31 @@
 import { Auth, AuthUser } from '@common/decorators';
-import { UsersService } from '@modules/users';
 import { User } from '@modules/users/esquemas';
 import {
   Controller,
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
-  Request,
   Query,
+  Req,
+  Ip,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiHeaders, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { ConfirmAccountDto, LoginDto, LoginResponseDto, SignUpDto } from './dto';
-import { JwtAuthGuard, LocalAuthGuard } from './guards';
+import {
+  ConfirmAccountDto,
+  ForgotPasswordDto,
+  LoginDto,
+  LoginResponseDto,
+  SignUpDto,
+} from './dto';
+import { LocalAuthGuard } from './guards';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly _auth: AuthService, private _user: UsersService) {}
+  constructor(private readonly _auth: AuthService) {}
 
   @Post('register')
   // @UseInterceptors(TokenInterceptor)
@@ -46,11 +49,18 @@ export class AuthController {
     return this._auth.login(user);
   }
 
-  @Auth({})
+  @Auth()
   @Get('me')
-  async getMe(@Request() req: any): Promise<User> {
-    console.log("🚀 ~ file: auth.controller.ts ~ line 52 ~ AuthController ~ getMe ~ req", req.user);
-    return req.user;
+  async getMe(@Req() request: Request): Promise<User> {
+    return request['user'] as User;
+  }
+
+  @Post('/forgotPassword')
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+    @Ip() ip: string,
+  ): Promise<boolean> {
+    await this._auth.forgotPassword(forgotPasswordDto, ip);
+    return true;
   }
 }
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imd1emFAc2VndXJvcGFyYXZpYWplLmNvbSIsImlhdCI6MTY1MjU0OTgzNywiZXhwIjoxNjUyNTUzNDM3fQ.p75eeIWooo_y4byX72SNlEc39LSSnhZUUynDr2rsBrg

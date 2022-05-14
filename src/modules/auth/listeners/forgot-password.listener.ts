@@ -1,11 +1,11 @@
 import { Config } from '@config';
-import { UserDocument } from '@modules/users/esquemas';
-import { UserCreatedEvent } from '@modules/users/events';
+import { Environment } from '@interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { AuthService } from '../auth.service';
+import { ForgotPassword } from '../interfaces/forgot-password.interface';
 
 @Injectable()
 export class ForgotPasswordListener {
@@ -14,13 +14,13 @@ export class ForgotPasswordListener {
   constructor(
     private readonly _auth: AuthService,
     private readonly _mailer: MailerService,
-    private _config: ConfigService,
+    private _config: ConfigService<Environment>,
   ) {
     this.clientAppUrl = this._config.get<string>(Config.CLIENT_APP_URL);
   }
 
   @OnEvent('forgot-password')
-  handleOrderCreatedEvent(user: UserDocument) {
+  handleOrderCreatedEvent({ user, ip }: ForgotPassword) {
     const token = this._auth.createToken(user);
     const forgotLink = `${this.clientAppUrl}/auth/confirm/forgotPassword?token=${token}`;
 
@@ -29,8 +29,11 @@ export class ForgotPasswordListener {
       subject: 'Has olvidado tu contraseña', // Subject line
       template: 'auth_forgot-password',
       context: {
+        ip,
         forgotLink,
+        email: user.email,
         firstName: user.firstName,
+        assets: this._config.get<string>('assets'),
       },
     });
   }

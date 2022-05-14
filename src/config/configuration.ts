@@ -1,6 +1,7 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   production: (process.env.PRODUCTION || 'false') == 'true',
+  assets: process.env.APP_ASSETS,
   database: {
     host: process.env.DATABASE_HOST,
     name: process.env.DATABASE_NAME,

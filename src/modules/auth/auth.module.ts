@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '@config';
 import { UserCreatedListener } from './listeners/user-created.listener';
+import { ForgotPasswordListener } from './listeners/forgot-password.listener';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { UserCreatedListener } from './listeners/user-created.listener';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, UserCreatedListener],
+  providers: [AuthService, LocalStrategy, JwtStrategy, UserCreatedListener, ForgotPasswordListener],
 })
 export class AuthModule {}

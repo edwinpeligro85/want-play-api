@@ -18,7 +18,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly _user: UsersService, private _jwt: JwtService, private eventEmitter: EventEmitter2) {}
+  constructor(
+    private readonly _user: UsersService,
+    private _jwt: JwtService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async register(signUp: SignUpDto): Promise<Partial<User>> {
     const { name: firstName, ...res } = signUp;
@@ -58,10 +62,8 @@ export class AuthService {
   }
 
   async confirm(token: string): Promise<User> {
-    const { sub } = this._jwt.verify<JwtPayload>(token);
+    const { sub } = await this.verifyToken(token);
     const user = await this._user.findOne(sub);
-
-    // // await this._token.delete(sub, token);
 
     if (user && user.status === Status.PENDING) {
       user.status = Status.ACTIVE;
@@ -75,27 +77,17 @@ export class AuthService {
     return new LoginResponseDto(this.createToken(user), user);
   }
 
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+    ip: string,
+  ): Promise<void> {
     const user = await this._user.findOneByEmail(forgotPasswordDto.email);
 
     if (!user) {
       throw new BadRequestException('Invalid email');
     }
 
-    this.eventEmitter.emit('forgot-password', user);
-
-    // const token = this.createToken(user);
-    // const forgotLink = `${this.clientAppUrl}/auth/forgotPassword?token=${token}`;
-
-    // await this.mailService.send({
-    //   from: this.configService.get<string>('JS_CODE_MAIL'),
-    //   to: user.email,
-    //   subject: 'Forgot Password',
-    //   html: `
-    //         <h3>Hello ${user.firstName}!</h3>
-    //         <p>Please use this <a href="${forgotLink}">link</a> to reset your password.</p>
-    //     `,
-    // });
+    this.eventEmitter.emit('forgot-password', { user, ip });
   }
 
   createToken(user: User): string {
@@ -103,15 +95,9 @@ export class AuthService {
     return this._jwt.sign(payload);
   }
 
-  private async verifyToken(token: string): Promise<JwtPayload> {
+  public async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      const data = this._jwt.verify<JwtPayload>(token);
-      // const tokenExists = await this._token.exists(data.sub, token);
-
-      // if (tokenExists) {
-      return data;
-      // }
-      throw new UnauthorizedException();
+      return this._jwt.verify<JwtPayload>(token);
     } catch (error) {
       throw new UnauthorizedException();
     }
