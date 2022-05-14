@@ -3,11 +3,12 @@ import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Gender, Status } from '../enums';
+import { IUser } from '@interfaces';
 
 export type UserDocument = User & Document;
 
 @Schema()
-export class User {
+export class User implements IUser {
   get id(): string {
     return this['_id'];
   }

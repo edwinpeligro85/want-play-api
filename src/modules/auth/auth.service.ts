@@ -13,7 +13,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@modules/users/enums';
-import { ForgotPasswordDto } from './dto';
+import { ChangePasswordDto, ForgotPasswordDto } from './dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -88,6 +88,15 @@ export class AuthService {
     }
 
     this.eventEmitter.emit('forgot-password', { user, ip });
+  }
+
+  async changePassword(
+    userId: string,
+    { password }: ChangePasswordDto,
+  ): Promise<boolean> {
+    await this._user.update(userId, { password });
+    // TODO: Revocar tokens
+    return true;
   }
 
   createToken(user: User): string {

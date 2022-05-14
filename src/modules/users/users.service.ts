@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './esquemas/user.schema';
 import { UserCreatedEvent } from './events';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -43,6 +44,10 @@ export class UsersService {
   }
 
   async update(_id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await this.hashPassword(updateUserDto.password);
+    }
+
     this.userModel.updateOne({ _id }, updateUserDto).exec();
 
     return this.findOne(_id);
@@ -60,5 +65,10 @@ export class UsersService {
     }
 
     return user.exec();
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
   }
 }
