@@ -10,14 +10,15 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto, SignUpDto } from './dto';
+import { ConfirmAccountDto, LoginDto, LoginResponseDto, SignUpDto } from './dto';
 import { LocalAuthGuard } from './guards';
 
-@ApiTags('Autenticación')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly _auth: AuthService) {}
@@ -26,6 +27,12 @@ export class AuthController {
   // @UseInterceptors(TokenInterceptor)
   async register(@Body() signUp: SignUpDto): Promise<User> {
     return this._auth.register(signUp) as any;
+  }
+
+  @Get('confirm')
+  async confirm(@Query() query: ConfirmAccountDto): Promise<boolean> {
+    await this._auth.confirm(query.token);
+    return true;
   }
 
   @Post('login')

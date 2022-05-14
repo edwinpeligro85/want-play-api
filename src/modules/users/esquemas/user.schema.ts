@@ -1,33 +1,38 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { Gender, Status } from '../enums';
 
 export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-  get id() {
+  get id(): string {
     return this['_id'];
   }
 
-  @ApiProperty()
   @Prop({ required: true })
   firstName: string;
 
-  @ApiProperty()
   @Prop()
   lastName?: string;
 
   @Prop()
   age?: number;
 
-  @ApiProperty()
   @Prop({ required: true })
   email: string;
 
+  @ApiHideProperty()
   @Prop({ select: false })
   password?: string;
+
+  @Prop({ enum: Object.values(Status), default: Status.PENDING })
+  status: Status;
+
+  @Prop({ enum: Object.values(Gender) })
+  gender?: Gender;
 
   constructor(data: Partial<User> = {}) {
     Object.assign(this, data);

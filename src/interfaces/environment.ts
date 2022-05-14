@@ -1,6 +1,11 @@
 export interface Environment {
+  port: number;
+  apiPrefix: string;
   production: boolean;
+  jwtSecret: string;
+  clientAppUrl: string;
   database: DataBaseEnvironment;
+  mailer: MailerEnvironment;
 }
 
 export interface DataBaseEnvironment {
@@ -8,4 +13,13 @@ export interface DataBaseEnvironment {
   name: string;
   username: string;
   password: string;
+}
+
+export interface MailerEnvironment {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  fromName: string;
+  fromEmail: string;
 }

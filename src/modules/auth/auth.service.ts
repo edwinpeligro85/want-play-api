@@ -1,11 +1,18 @@
 import { User } from '@modules/users/esquemas';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
+import { Status } from '@modules/users/enums';
 
 @Injectable()
 export class AuthService {
@@ -48,6 +55,20 @@ export class AuthService {
     return { user: rest, message: null };
   }
 
+  async confirm(token: string): Promise<User> {
+    const { sub } = this._jwt.verify<JwtPayload>(token);
+    const user = await this._user.findOne(sub);
+
+    // // await this._token.delete(sub, token);
+
+    if (user && user.status === Status.PENDING) {
+      user.status = Status.ACTIVE;
+      return this._user.update(user.id, user);
+    }
+
+    throw new BadRequestException('Confirmation error');
+  }
+
   async login(user: User): Promise<LoginResponseDto> {
     return new LoginResponseDto(this.createToken(user), user);
   }
@@ -55,5 +76,19 @@ export class AuthService {
   createToken(user: User): string {
     const payload: JwtPayload = { email: user.email, sub: user.id };
     return this._jwt.sign(payload);
+  }
+
+  private async verifyToken(token: string): Promise<JwtPayload> {
+    try {
+      const data = this._jwt.verify<JwtPayload>(token);
+      // const tokenExists = await this._token.exists(data.sub, token);
+
+      // if (tokenExists) {
+      return data;
+      // }
+      throw new UnauthorizedException();
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }

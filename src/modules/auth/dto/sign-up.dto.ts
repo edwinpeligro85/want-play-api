@@ -11,11 +11,13 @@ import {
 export class SignUpDto {
   @IsDefined()
   @IsNotEmpty()
+  @MinLength(2)
+  @MaxLength(45)
   readonly name: string;
 
   @IsEmail()
   @MaxLength(255, { always: true })
-  @Validate(IsUserAlreadyExist)
+  // @Validate(IsUserAlreadyExist)
   readonly email: string;
 
   @IsDefined()
