@@ -9,8 +9,8 @@ import { JwtAuthGuard } from '@modules/auth/guards';
 
 export function Auth(...roles: Role[]) {
   return applyDecorators(
-    UseGuards(JwtAuthGuard, ACGuard),
-    UseRoles(...roles),
+    UseGuards(JwtAuthGuard),
+    // UseRoles(...roles),
     ApiBearerAuth(),
     ApiUnauthorizedResponse({
       description: 'Error: Unauthorized',

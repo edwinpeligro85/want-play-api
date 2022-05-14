@@ -17,7 +17,7 @@ export class SignUpDto {
 
   @IsEmail()
   @MaxLength(255, { always: true })
-  // @Validate(IsUserAlreadyExist)
+  @Validate(IsUserAlreadyExist)
   readonly email: string;
 
   @IsDefined()

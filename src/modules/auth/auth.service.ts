@@ -13,10 +13,12 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@modules/users/enums';
+import { ForgotPasswordDto } from './dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly _user: UsersService, private _jwt: JwtService) {}
+  constructor(private readonly _user: UsersService, private _jwt: JwtService, private eventEmitter: EventEmitter2) {}
 
   async register(signUp: SignUpDto): Promise<Partial<User>> {
     const { name: firstName, ...res } = signUp;
@@ -73,8 +75,31 @@ export class AuthService {
     return new LoginResponseDto(this.createToken(user), user);
   }
 
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    const user = await this._user.findOneByEmail(forgotPasswordDto.email);
+
+    if (!user) {
+      throw new BadRequestException('Invalid email');
+    }
+
+    this.eventEmitter.emit('forgot-password', user);
+
+    // const token = this.createToken(user);
+    // const forgotLink = `${this.clientAppUrl}/auth/forgotPassword?token=${token}`;
+
+    // await this.mailService.send({
+    //   from: this.configService.get<string>('JS_CODE_MAIL'),
+    //   to: user.email,
+    //   subject: 'Forgot Password',
+    //   html: `
+    //         <h3>Hello ${user.firstName}!</h3>
+    //         <p>Please use this <a href="${forgotLink}">link</a> to reset your password.</p>
+    //     `,
+    // });
+  }
+
   createToken(user: User): string {
-    const payload: JwtPayload = { email: user.email, sub: user.id };
+    const payload: JwtPayload = { email: user.email, sub: user['_id'] };
     return this._jwt.sign(payload);
   }
 

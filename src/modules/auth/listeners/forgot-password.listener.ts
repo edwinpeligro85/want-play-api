@@ -1,4 +1,5 @@
 import { Config } from '@config';
+import { UserDocument } from '@modules/users/esquemas';
 import { UserCreatedEvent } from '@modules/users/events';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +8,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class UserCreatedListener {
+export class ForgotPasswordListener {
   private clientAppUrl: string;
 
   constructor(
@@ -18,18 +19,17 @@ export class UserCreatedListener {
     this.clientAppUrl = this._config.get<string>(Config.CLIENT_APP_URL);
   }
 
-  @OnEvent('user.created')
-  handleOrderCreatedEvent(event: UserCreatedEvent) {
-    const { user } = event;
+  @OnEvent('forgot-password')
+  handleOrderCreatedEvent(user: UserDocument) {
     const token = this._auth.createToken(user);
-    const confirmLink = `${this.clientAppUrl}/auth/confirm/account?token=${token}`;
+    const forgotLink = `${this.clientAppUrl}/auth/confirm/forgotPassword?token=${token}`;
 
     this._mailer.sendMail({
       to: user.email, // list of receivers
-      subject: 'Verificar correo electrónico', // Subject line
-      template: 'auth_verify-email',
+      subject: 'Has olvidado tu contraseña', // Subject line
+      template: 'auth_forgot-password',
       context: {
-        confirmLink,
+        forgotLink,
         firstName: user.firstName,
       },
     });

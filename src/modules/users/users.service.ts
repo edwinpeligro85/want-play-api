@@ -38,7 +38,7 @@ export class UsersService {
     return this.userModel.find().exec();
   }
 
-  async findOne(id: string): Promise<User | undefined> {
+  async findOne(id: string): Promise<UserDocument | undefined> {
     return this.userModel.findById(id).exec();
   }
 
