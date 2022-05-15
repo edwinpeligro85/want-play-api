@@ -1,4 +1,3 @@
-import { Config } from '@config';
 import { Environment } from '@interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
@@ -16,7 +15,7 @@ export class ForgotPasswordListener {
     private readonly _mailer: MailerService,
     private _config: ConfigService<Environment>,
   ) {
-    this.clientAppUrl = this._config.get<string>(Config.CLIENT_APP_URL);
+    this.clientAppUrl = this._config.get<string>('clientAppUrl');
   }
 
   @OnEvent('forgot-password')

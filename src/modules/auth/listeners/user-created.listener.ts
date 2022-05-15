@@ -1,4 +1,4 @@
-import { Config } from '@config';
+import { Environment } from '@interfaces';
 import { UserCreatedEvent } from '@modules/users/events';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
@@ -13,9 +13,9 @@ export class UserCreatedListener {
   constructor(
     private readonly _auth: AuthService,
     private readonly _mailer: MailerService,
-    private _config: ConfigService,
+    private _config: ConfigService<Environment>,
   ) {
-    this.clientAppUrl = this._config.get<string>(Config.CLIENT_APP_URL);
+    this.clientAppUrl = this._config.get<string>('clientAppUrl');
   }
 
   @OnEvent('user.created')

@@ -19,4 +19,10 @@ export default () => ({
     fromName: process.env.MAIL_FROM_NAME,
     fromEmail: process.env.MAIL_FROM_EMAIL,
   },
+  auth: {
+    fb: {
+      id: parseInt(process.env.AUTH_FB_ID, 10),
+      secret: process.env.AUTH_FB_SECRET,
+    },
+  },
 });

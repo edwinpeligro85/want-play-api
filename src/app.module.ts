@@ -3,14 +3,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppServeStaticModule } from './app.serve-static.module';
 import { AppService } from './app.service';
-import { Configuration } from './config';
+import { AppConfigModule } from './config';
 import { DatabaseModule } from './database';
 import { MailModule } from './mail';
 import { FeatureModules } from './modules';
 
 @Module({
   imports: [
-    Configuration,
+    AppConfigModule,
     DatabaseModule,
     MailModule,
     EventEmitterModule.forRoot(),

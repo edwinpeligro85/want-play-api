@@ -1,5 +1,4 @@
-import { Config } from '@config';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { useContainer } from 'class-validator';
@@ -12,7 +11,7 @@ async function bootstrap() {
   const _config = app.get(ConfigService);
   const logger = new Logger();
 
-  app.setGlobalPrefix(_config.get(Config.API_PREFIX));
+  app.setGlobalPrefix(_config.get<string>('apiPrefix'));
 
   // Automatic Validations
   initValiadtionPipe(app);
@@ -29,7 +28,7 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  await app.listen(_config.get(Config.PORT));
+  await app.listen(_config.get<number>('port'));
 
   logger.log(`App is running on ${await app.getUrl()}`);
 }

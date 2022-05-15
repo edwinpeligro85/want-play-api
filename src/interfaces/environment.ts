@@ -7,6 +7,7 @@ export interface Environment {
   database: DataBaseEnvironment;
   mailer: MailerEnvironment;
   assets: string;
+  auth: AuthEnvironment;
 }
 
 export interface DataBaseEnvironment {
@@ -23,4 +24,13 @@ export interface MailerEnvironment {
   password: string;
   fromName: string;
   fromEmail: string;
+}
+
+export interface AuthEnvironment {
+  fb: AuthFacebookEnvironment;
+}
+
+export interface AuthFacebookEnvironment {
+  id: number;
+  secret: string;
 }
