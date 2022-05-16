@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy, LocalStrategy } from './strategies';
+import { FacebookStrategy, JwtStrategy, LocalStrategy } from './strategies';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserCreatedListener } from './listeners/user-created.listener';
@@ -27,6 +27,7 @@ import { Environment } from '@interfaces';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    FacebookStrategy,
     UserCreatedListener,
     ForgotPasswordListener,
   ],

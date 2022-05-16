@@ -1,5 +1,5 @@
 import { Auth, AuthUser } from '@common/decorators';
-import { IUser } from '@interfaces';
+import { Environment, IUser } from '@interfaces';
 import { User } from '@modules/users/esquemas';
 import {
   Controller,
@@ -10,8 +10,12 @@ import {
   Query,
   Ip,
   Patch,
+  HttpStatus,
+  Res,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
@@ -21,12 +25,16 @@ import {
   LoginResponseDto,
   SignUpDto,
 } from './dto';
-import { LocalAuthGuard } from './guards';
+import { FacebookAuthGuard, LocalAuthGuard } from './guards';
+import { FacebookPayload } from './interfaces';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly _auth: AuthService) {}
+  constructor(
+    private readonly _auth: AuthService,
+    private readonly _config: ConfigService<Environment>,
+  ) {}
 
   @Post('register')
   async register(@Body() signUp: SignUpDto): Promise<User> {
@@ -74,5 +82,32 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<boolean> {
     return this._auth.changePassword(user._id, changePasswordDto);
+  }
+
+  @Get('/facebook')
+  @UseGuards(FacebookAuthGuard)
+  async facebookLogin(): Promise<number> {
+    return HttpStatus.OK;
+  }
+
+  @Get('/facebook/redirect')
+  @UseGuards(FacebookAuthGuard)
+  async facebookLoginRedirect(
+    @Res() res: Response,
+    @AuthUser() payload: FacebookPayload,
+  ): Promise<any> {
+    if (!payload) {
+      return res.redirect(
+        this._config.get<string>('clientAppUrl') + '/auth/login',
+      );
+    }
+
+    const accessToken = await this._auth.facebookLogin(payload.user);
+
+    return res.redirect(
+      this._config.get<string>('clientAppUrl') +
+        '/auth/third-party-redirect?token=' +
+        accessToken,
+    );
   }
 }

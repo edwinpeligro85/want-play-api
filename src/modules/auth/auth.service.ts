@@ -10,11 +10,11 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@modules/users/enums';
 import { ChangePasswordDto, ForgotPasswordDto } from './dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FacebookUser, JwtPayload } from './interfaces';
 
 @Injectable()
 export class AuthService {
@@ -110,5 +110,22 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  public async facebookLogin(fb: FacebookUser): Promise<string> {
+    let user = await this._user.findOneByEmail(fb.email);
+
+    if (!user) {
+      const userCreated = new User(fb);
+      userCreated.status = Status.ACTIVE;
+      userCreated.password = 'facebook';
+
+      user = await this._user.create(userCreated);
+    } else if (!user.facebookId) {
+      user.facebookId = fb.facebookId;
+      this._user.update(user.id, user);
+    }
+
+    return this.createToken(user);
   }
 }

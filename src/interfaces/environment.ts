@@ -6,6 +6,7 @@ export interface Environment {
   clientAppUrl: string;
   database: DataBaseEnvironment;
   mailer: MailerEnvironment;
+  appUrl: string;
   assets: string;
   auth: AuthEnvironment;
 }

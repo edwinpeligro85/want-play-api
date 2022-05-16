@@ -9,4 +9,5 @@ export interface IUser {
   password?: string;
   lastName?: string;
   firstName: string;
+  facebookId?: string;
 }

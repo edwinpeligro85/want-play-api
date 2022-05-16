@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './esquemas/user.schema';
 import { UserCreatedEvent } from './events';
@@ -27,10 +26,12 @@ export class UsersService {
   async create(data: Partial<User>): Promise<UserDocument> {
     const user = await new this.userModel(data).save();
 
-    const userCreatedEvent = new UserCreatedEvent();
-    userCreatedEvent.user = user;
+    if (!user.thirdPartyAuth) {
+      const userCreatedEvent = new UserCreatedEvent();
+      userCreatedEvent.user = user;
 
-    this.eventEmitter.emit('user.created', userCreatedEvent);
+      this.eventEmitter.emit('user.created', userCreatedEvent);
+    }
 
     return user;
   }
@@ -57,7 +58,10 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  async findOneByEmail(email: string, password: boolean = false) {
+  async findOneByEmail(
+    email: string,
+    password: boolean = false,
+  ): Promise<UserDocument> {
     const user = this.userModel.findOne({ email });
 
     if (password) {
@@ -65,6 +69,13 @@ export class UsersService {
     }
 
     return user.exec();
+  }
+
+  async findOneByThirdPartyAuth(
+    type: 'facebookId',
+    clientId: string,
+  ): Promise<UserDocument> {
+    return this.userModel.findOne({ [type]: clientId }).exec();
   }
 
   async hashPassword(password: string): Promise<string> {
