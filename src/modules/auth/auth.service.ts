@@ -1,4 +1,4 @@
-import { User } from '@modules/users/esquemas';
+import { User } from '@modules/users/schemas';
 import {
   BadRequestException,
   HttpException,
@@ -94,6 +94,12 @@ export class AuthService {
     userId: string,
     { password }: ChangePasswordDto,
   ): Promise<boolean> {
+    const user = await this._user.findOne(userId, true);
+
+    if (await bcrypt.compare(password, user.password)) {
+      throw new BadRequestException('Invalid change password');
+    }
+
     await this._user.update(userId, { password });
     // TODO: Revocar tokens
     return true;
@@ -118,7 +124,7 @@ export class AuthService {
     if (!user) {
       const userCreated = new User(fb);
       userCreated.status = Status.ACTIVE;
-      userCreated.password = 'facebook';
+      userCreated.password = fb.facebookId;
 
       user = await this._user.create(userCreated);
     } else if (!user.facebookId) {

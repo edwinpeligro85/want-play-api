@@ -2,18 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ApiHideProperty } from '@nestjs/swagger';
-import { Gender, Status } from '../enums';
+import { Status } from '../enums';
 import { IUser } from '@interfaces';
 import { isNotEmpty } from 'class-validator';
+import { Base } from '@common/schemas';
 
 export type UserDocument = User & Document;
 
 @Schema()
-export class User implements IUser {
-  get id(): string {
-    return this['_id'];
-  }
-
+export class User extends Base<User> implements IUser {
   get thirdPartyAuth(): boolean {
     return isNotEmpty(this.facebookId);
   }
@@ -24,10 +21,7 @@ export class User implements IUser {
   @Prop()
   lastName?: string;
 
-  @Prop()
-  age?: number;
-
-  @Prop({ required: true, maxlength: 255 })
+  @Prop({ unique: true, type: 'string', required: true, maxlength: 255 })
   email: string;
 
   @ApiHideProperty()
@@ -37,15 +31,8 @@ export class User implements IUser {
   @Prop({ enum: Object.values(Status), default: Status.PENDING, maxlength: 10 })
   status: Status;
 
-  @Prop({ enum: Object.values(Gender) })
-  gender?: Gender;
-
   @Prop({ maxlength: 20 })
   facebookId?: string;
-
-  constructor(data: Partial<User> = {}) {
-    Object.assign(this, data);
-  }
 
   async checkPassword?(plainPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, this.password);

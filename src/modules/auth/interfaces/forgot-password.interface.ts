@@ -1,4 +1,4 @@
-import { User } from '@modules/users/esquemas';
+import { User } from '@modules/users/schemas';
 
 export interface ForgotPassword {
   user: User;

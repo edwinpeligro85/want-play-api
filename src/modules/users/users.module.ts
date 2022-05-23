@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchemaProvider } from './esquemas/user.schema';
+import { UserSchemaProvider } from './schemas/user.schema';
 import { IsUserAlreadyExist } from './validators';
 
 @Module({

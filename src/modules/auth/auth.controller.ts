@@ -1,6 +1,6 @@
 import { Auth, AuthUser } from '@common/decorators';
 import { Environment, IUser } from '@interfaces';
-import { User } from '@modules/users/esquemas';
+import { User } from '@modules/users/schemas';
 import {
   Controller,
   Get,
@@ -98,7 +98,7 @@ export class AuthController {
   ): Promise<any> {
     if (!payload) {
       return res.redirect(
-        this._config.get<string>('clientAppUrl') + '/auth/login',
+        this._config.get<string>('clientAppUrl') + '/auth/sign-in',
       );
     }
 

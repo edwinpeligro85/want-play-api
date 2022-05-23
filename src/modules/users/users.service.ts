@@ -3,7 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './esquemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 import { UserCreatedEvent } from './events';
 import * as bcrypt from 'bcrypt';
 
@@ -40,8 +40,17 @@ export class UsersService {
     return this.userModel.find().exec();
   }
 
-  async findOne(id: string): Promise<UserDocument | undefined> {
-    return this.userModel.findById(id).exec();
+  async findOne(
+    id: string,
+    password: boolean = false,
+  ): Promise<UserDocument | undefined> {
+    const user = this.userModel.findById(id);
+
+    if (password) {
+      user.select('+password');
+    }
+
+    return user.exec();
   }
 
   async update(_id: string, updateUserDto: UpdateUserDto): Promise<User> {

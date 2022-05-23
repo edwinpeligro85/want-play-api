@@ -21,7 +21,7 @@ export class ForgotPasswordListener {
   @OnEvent('forgot-password')
   handleOrderCreatedEvent({ user, ip }: ForgotPassword) {
     const token = this._auth.createToken(user);
-    const forgotLink = `${this.clientAppUrl}/auth/confirm/forgotPassword?token=${token}`;
+    const forgotLink = `${this.clientAppUrl}/auth/change-password?token=${token}`;
 
     this._mailer.sendMail({
       to: user.email, // list of receivers

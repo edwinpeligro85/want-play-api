@@ -1,4 +1,4 @@
-import { UserDocument } from '../esquemas';
+import { UserDocument } from '../schemas';
 
 export class UserCreatedEvent {
   user: UserDocument;
