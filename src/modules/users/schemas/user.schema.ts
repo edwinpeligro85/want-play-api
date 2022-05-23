@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Status } from '../enums';
 import { IUser } from '@interfaces';
 import { isNotEmpty } from 'class-validator';
 import { Base } from '@common/schemas';
+import { Profile } from '@modules/profile/schemas';
 
 export type UserDocument = User & Document;
 
@@ -33,6 +34,9 @@ export class User extends Base<User> implements IUser {
 
   @Prop({ maxlength: 20 })
   facebookId?: string;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Profile.name })
+  profile: Profile;
 
   async checkPassword?(plainPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, this.password);
