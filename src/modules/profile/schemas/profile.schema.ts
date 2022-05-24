@@ -16,6 +16,12 @@ export class Profile extends Base<Profile> {
   @Prop()
   age?: number;
 
+  @Prop()
+  aboutMe?: string;
+
+  @Prop()
+  nickname?: string;
+
   @Prop(
     raw([
       {

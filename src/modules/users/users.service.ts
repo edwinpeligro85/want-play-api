@@ -58,7 +58,7 @@ export class UsersService {
       updateUserDto.password = await this.hashPassword(updateUserDto.password);
     }
 
-    this.userModel.updateOne({ _id }, updateUserDto).exec();
+    await this.userModel.updateOne({ _id }, updateUserDto).exec();
 
     return this.findOne(_id);
   }
