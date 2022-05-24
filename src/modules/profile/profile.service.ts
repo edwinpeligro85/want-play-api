@@ -54,11 +54,11 @@ export class ProfileService {
   async follow(owner: string, toFollow: string) {
     let session: ClientSession = null;
 
-    if (!(await this.findOne(owner)) && !(await this.findOne(toFollow))) {
+    if (!(await this.findOne(owner)) || !(await this.findOne(toFollow))) {
       throw new BadRequestException('Profile no exist');
     }
 
-    if (await this.followerModel.findOne({ owner, to: toFollow }).exec()) {
+    if (await this.followerModel.exists({ owner, to: toFollow }).exec()) {
       throw new BadRequestException(
         `Profile ${owner} already follow at ${toFollow}`,
       );
@@ -78,6 +78,38 @@ export class ProfileService {
         return this.followingModel.create([{ owner: toFollow, to: owner }], {
           session: session,
         });
+      })
+      .then(() => session.commitTransaction())
+      .then(() => session.endSession());
+  }
+
+  async unfollow(owner: string, toRemove: string) {
+    let session: ClientSession = null;
+
+    if (!(await this.findOne(owner)) || !(await this.findOne(toRemove))) {
+      throw new BadRequestException('Profile no exist');
+    }
+
+    if (!(await this.followerModel.exists({ owner, to: toRemove }).exec())) {
+      throw new BadRequestException(
+        `Profile ${owner} not follow at ${toRemove}`,
+      );
+    }
+
+    return this.connection
+      .startSession()
+      .then((_session) => {
+        session = _session;
+        session.startTransaction();
+
+        return this.followerModel
+          .deleteOne({ owner, to: toRemove })
+          .session(session);
+      })
+      .then(() => {
+        return this.followingModel
+          .deleteOne({ owner: toRemove, to: owner })
+          .session(session);
       })
       .then(() => session.commitTransaction())
       .then(() => session.endSession());

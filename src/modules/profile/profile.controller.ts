@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FollowDto } from './dto/follow.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -26,5 +26,10 @@ export class ProfileController {
   @Put(':id/following/:target')
   follow(@Param() dto: FollowDto): Promise<void> {
     return this._profile.follow(dto.id, dto.target);
+  }
+
+  @Delete(':id/following/:target')
+  unfollow(@Param() dto: FollowDto): Promise<void> {
+    return this._profile.unfollow(dto.id, dto.target);
   }
 }
