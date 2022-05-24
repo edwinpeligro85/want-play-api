@@ -1,13 +1,12 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Base } from '@common/schemas';
+import { TimestampsModel } from '@common/schemas';
 import { Gender } from '../enums';
-import { SocialMedia } from '../dto/update-profile.dto';
 
 export type ProfileDocument = Profile & Document;
 
 @Schema({ timestamps: true })
-export class Profile extends Base<Profile> {
+export class Profile extends TimestampsModel<Profile> {
   @Prop({ enum: Object.values(Gender) })
   gender?: Gender;
 

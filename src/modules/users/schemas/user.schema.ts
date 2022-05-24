@@ -5,13 +5,13 @@ import { ApiHideProperty } from '@nestjs/swagger';
 import { Status } from '../enums';
 import { IUser } from '@interfaces';
 import { isNotEmpty } from 'class-validator';
-import { Base } from '@common/schemas';
+import { TimestampsModel } from '@common/schemas';
 import { Profile } from '@modules/profile/schemas';
 
 export type UserDocument = User & Document;
 
 @Schema()
-export class User extends Base<User> implements IUser {
+export class User extends TimestampsModel<User> implements IUser {
   get thirdPartyAuth(): boolean {
     return isNotEmpty(this.facebookId);
   }

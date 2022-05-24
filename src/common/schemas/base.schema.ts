@@ -5,9 +5,6 @@ export class Base<Type> {
     return this._id;
   }
 
-  createdAt: Date;
-  updatedAt: Date;
-
   constructor(data: Partial<Type> = {}) {
     Object.assign(this, data);
   }
