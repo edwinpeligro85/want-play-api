@@ -1,4 +1,5 @@
 import { AuthModule } from './auth';
+import { LocationModule } from './location';
 import { PostsModule } from './posts';
 import { ProfileModule } from './profile';
 import { TokenModule } from './token';
@@ -10,4 +11,5 @@ export const FeatureModules = [
   UsersModule,
   ProfileModule,
   PostsModule,
+  LocationModule,
 ];

@@ -36,7 +36,7 @@ export class UsersService {
     return user;
   }
 
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.userModel.find().exec();
   }
 
