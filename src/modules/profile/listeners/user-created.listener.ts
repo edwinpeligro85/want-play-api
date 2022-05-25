@@ -9,7 +9,7 @@ export class UserCreatedListener {
 
   @OnEvent('user.created')
   async handleOrderCreatedEvent({ user }: UserCreatedEvent) {
-    const profile = await this._profile.create();
+    const profile = await this._profile.create(user.firstName);
 
     user.profile = profile._id;
     user.save();

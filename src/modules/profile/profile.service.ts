@@ -26,9 +26,10 @@ export class ProfileService {
     return this.profileModel.findById(id).exec();
   }
 
-  async create() {
+  async create(userName: string) {
     const createdProfile = new this.profileModel({
       age: 0,
+      nickname: `${userName.substring(0, 3)}${Math.floor(Math.random() * (999 + 1 - 0) + 0)}`,
       birthDate: new Date(),
       socialMedias: [],
     });
@@ -51,16 +52,22 @@ export class ProfileService {
     return this.profileModel.findById(_id).exec();
   }
 
-  async follow(owner: string, toFollow: string) {
+  async follow(follower: string, toFollow: string) {
     let session: ClientSession = null;
 
-    if (!(await this.findOne(owner)) || !(await this.findOne(toFollow))) {
+    if (follower === toFollow) {
+      throw new BadRequestException('Profile can not be followed yourself');
+    }
+
+    if (!(await this.findOne(follower)) || !(await this.findOne(toFollow))) {
       throw new BadRequestException('Profile no exist');
     }
 
-    if (await this.followerModel.exists({ owner, to: toFollow }).exec()) {
+    if (
+      await this.followerModel.exists({ follower, followerOf: toFollow }).exec()
+    ) {
       throw new BadRequestException(
-        `Profile ${owner} already follow at ${toFollow}`,
+        `Profile ${follower} already follow at ${toFollow}`,
       );
     }
 
@@ -70,29 +77,36 @@ export class ProfileService {
         session = _session;
         session.startTransaction();
 
-        return this.followerModel.create([{ owner, to: toFollow }], {
+        return this.followerModel.create([{ follower, followerOf: toFollow }], {
           session: session,
         });
       })
       .then(() => {
-        return this.followingModel.create([{ owner: toFollow, to: owner }], {
-          session: session,
-        });
+        return this.followingModel.create(
+          [{ followingOf: toFollow, following: follower }],
+          {
+            session: session,
+          },
+        );
       })
       .then(() => session.commitTransaction())
       .then(() => session.endSession());
   }
 
-  async unfollow(owner: string, toRemove: string) {
+  async unfollow(follower: string, toRemove: string) {
     let session: ClientSession = null;
 
-    if (!(await this.findOne(owner)) || !(await this.findOne(toRemove))) {
+    if (!(await this.findOne(follower)) || !(await this.findOne(toRemove))) {
       throw new BadRequestException('Profile no exist');
     }
 
-    if (!(await this.followerModel.exists({ owner, to: toRemove }).exec())) {
+    if (
+      !(await this.followerModel
+        .exists({ follower, followingOf: toRemove })
+        .exec())
+    ) {
       throw new BadRequestException(
-        `Profile ${owner} not follow at ${toRemove}`,
+        `Profile ${follower} not follow at ${toRemove}`,
       );
     }
 
@@ -103,15 +117,45 @@ export class ProfileService {
         session.startTransaction();
 
         return this.followerModel
-          .deleteOne({ owner, to: toRemove })
+          .deleteOne({ follower, followerOf: toRemove })
           .session(session);
       })
       .then(() => {
         return this.followingModel
-          .deleteOne({ owner: toRemove, to: owner })
+          .deleteOne({ followingOf: toRemove, following: follower })
           .session(session);
       })
       .then(() => session.commitTransaction())
       .then(() => session.endSession());
+  }
+
+  async followers(id: string, fullProfile: boolean): Promise<Profile[]> {
+    const query = this.followerModel
+      .where({ followerOf: id })
+      .select('follower');
+
+    if (fullProfile) {
+      query.populate(['follower']);
+    }
+
+    return (await query.exec()).map((res) => res.follower);
+  }
+
+  async followersCount(id: string): Promise<number> {
+    return this.followerModel.count({ followerOf: id }).exec();
+  }
+
+  async following(id: string, fullProfile: boolean): Promise<Profile[]> {
+    const query = this.followingModel.where({ following: id });
+
+    if (fullProfile) {
+      query.populate(['followingOf']);
+    }
+
+    return (await query.exec()).map((res) => res.followingOf);
+  }
+
+  async followingCount(id: string): Promise<number> {
+    return this.followingModel.count({ following: id }).exec();
   }
 }

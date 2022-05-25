@@ -8,10 +8,10 @@ export type FollowingDocument = Following & Document;
 @Schema()
 export class Following extends Base<Following> {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Profile.name })
-  owner: Profile;
+  following: Profile;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Profile.name })
-  to: Profile;
+  followingOf: Profile;
 }
 
 export const FollowingSchema = SchemaFactory.createForClass(Following);
