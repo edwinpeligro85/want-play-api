@@ -16,13 +16,14 @@ import { Post as PostModel, Post as PostSchema } from './schemas';
 import { Auth, AuthUser } from '@common/decorators';
 import { IUser } from '@interfaces';
 import {
+  CollectionDto,
   CollectionResponse,
-  CollectionValidationPipe,
-} from '@sigmaott/paginate';
+  ValidationPipe,
+} from '@forlagshuset/nestjs-mongoose-paginate';
 import { PostProperties } from './dto/post-properties.paginate';
 import { IsMongoIdPipe } from '@common/pipes';
 
-// @Auth()
+@Auth()
 @ApiTags('Post')
 @Controller('posts')
 export class PostsController {
@@ -41,8 +42,8 @@ export class PostsController {
 
   @Get()
   findAll(
-    @Query(new CollectionValidationPipe(PostProperties))
-    collectionDto: any,
+    @Query(new ValidationPipe(PostProperties))
+    collectionDto: CollectionDto,
   ): Promise<CollectionResponse<PostModel>> {
     return this.postsService.findAll(collectionDto);
   }

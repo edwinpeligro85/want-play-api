@@ -15,5 +15,6 @@ import { LocationModule } from '@modules/location';
   ],
   controllers: [PostsController],
   providers: [PostsService],
+  exports: [PostsService],
 })
 export class PostsModule {}

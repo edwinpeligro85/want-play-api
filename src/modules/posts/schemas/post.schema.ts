@@ -33,3 +33,8 @@ export class Post extends Base<Post> {
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
+
+PostSchema.pre('find', function (next) {
+  this.populate('owner city');
+  next();
+});

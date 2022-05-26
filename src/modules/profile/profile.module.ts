@@ -10,6 +10,7 @@ import {
   Profile,
   ProfileSchema,
 } from './schemas';
+import { PostsModule } from '@modules/posts';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
       { name: Follower.name, schema: FollowerSchema },
       { name: Following.name, schema: FollowingSchema },
     ]),
+    PostsModule,
   ],
   controllers: [ProfileController],
   providers: [ProfileService],

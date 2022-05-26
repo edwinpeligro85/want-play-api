@@ -11,6 +11,13 @@ async function bootstrap() {
   const _config = app.get(ConfigService);
   const logger = new Logger();
 
+  app.enableCors({
+    methods: '*',
+    origin: '*',
+    allowedHeaders: '*',
+    credentials: false,
+  });
+
   app.setGlobalPrefix(_config.get<string>('apiPrefix'));
 
   // Automatic Validations
@@ -18,13 +25,6 @@ async function bootstrap() {
 
   // Swagger Documentation API
   initSwagger(app);
-
-  app.enableCors({
-    methods: '*',
-    origin: '*',
-    allowedHeaders: '*',
-    credentials: false,
-  });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 

@@ -1,4 +1,5 @@
 import { Auth } from '@common/decorators';
+import { IsMongoIdPipe } from '@common/pipes';
 import {
   Body,
   Controller,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FollowDto } from './dto/follow.dto';
+import { ProfileResponseDto } from './dto/profile-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileService } from './profile.service';
 import { Profile } from './schemas';
@@ -22,39 +24,39 @@ export class ProfileController {
   constructor(private readonly _profile: ProfileService) {}
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Profile> {
+  findOne(@Param('id', IsMongoIdPipe) id: string): Promise<ProfileResponseDto> {
     return this._profile.findOne(id);
   }
 
   @Get(':id/followers')
   followers(
-    @Param('id') id: string,
+    @Param('id', IsMongoIdPipe) id: string,
     @Query('full') full: boolean = false,
   ): Promise<Profile[]> {
     return this._profile.followers(id, full);
   }
 
   @Get(':id/followers_count')
-  followersCount(@Param('id') id: string): Promise<number> {
+  followersCount(@Param('id', IsMongoIdPipe) id: string): Promise<number> {
     return this._profile.followersCount(id);
   }
 
   @Get(':id/following')
   following(
-    @Param('id') id: string,
+    @Param('id', IsMongoIdPipe) id: string,
     @Query('full') full: boolean = false,
   ): Promise<Profile[]> {
     return this._profile.following(id, full);
   }
 
   @Get(':id/following_count')
-  followingCount(@Param('id') id: string): Promise<number> {
+  followingCount(@Param('id', IsMongoIdPipe) id: string): Promise<number> {
     return this._profile.followingCount(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', IsMongoIdPipe) id: string,
     @Body() updateprofileDto: UpdateProfileDto,
   ): Promise<Profile> {
     return this._profile.update(id, updateprofileDto);

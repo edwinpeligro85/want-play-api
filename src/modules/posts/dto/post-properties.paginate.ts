@@ -1,15 +1,15 @@
-import { CollectionProperties, ExposeQuery } from '@sigmaott/paginate';
+import { CollectionProperties, Expose } from '@forlagshuset/nestjs-mongoose-paginate';
 
 export class PostProperties extends CollectionProperties {
-  @ExposeQuery({ name: 'created_at', sortable: true })
+  @Expose({ name: 'created_at', sortable: true })
   readonly createdAt: 'desc' | 'asc';
 
-  @ExposeQuery({ filterable: true, populate: true })
+  @Expose({ filterable: true })
   readonly city: string;
 
-  @ExposeQuery({ filterable: true, populate: true })
+  @Expose({ filterable: true })
   readonly owner: string;
 
-  @ExposeQuery({ filterable: true })
+  @Expose({ filterable: true })
   readonly type: string;
 }

@@ -2,7 +2,7 @@ import {
   CollectionDto,
   CollectionResponse,
   DocumentCollector,
-} from '@sigmaott/paginate';
+} from '@forlagshuset/nestjs-mongoose-paginate';
 import { LocationService } from '@modules/location';
 import {
   BadRequestException,
@@ -45,7 +45,7 @@ export class PostsService {
   async findOne(id: string): Promise<Post> {
     const post = await this.postModel
       .findById(id)
-      .populate(['city'])
+      .populate('owner city')
       .exec();
 
     if (!post) {
@@ -64,5 +64,9 @@ export class PostsService {
 
   async remove(id: string) {
     return this.postModel.findByIdAndRemove(id);
+  }
+
+  async userPostCount(owner: string): Promise<number> {
+    return this.postModel.count({ owner }).exec();
   }
 }

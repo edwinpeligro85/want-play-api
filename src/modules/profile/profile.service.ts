@@ -1,8 +1,14 @@
+import { PostsService } from '@modules/posts';
 import { User } from '@modules/users/schemas';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { ClientSession, Connection, Model } from 'mongoose';
+import { ProfileResponseDto } from './dto/profile-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import {
   Follower,
@@ -21,10 +27,22 @@ export class ProfileService {
     @InjectModel(Following.name)
     private followingModel: Model<FollowingDocument>,
     @InjectConnection() private connection: Connection,
+    private _posts: PostsService,
   ) {}
 
-  async findOne(id: string): Promise<ProfileDocument | undefined> {
-    return this.profileModel.findById(id).exec();
+  async findOne(id: string): Promise<ProfileResponseDto> {
+    const profile = await this.profileModel.findById(id).exec();
+
+    if (!profile) {
+      throw new NotFoundException(`Profile ${id} not found`);
+    }
+
+    const response = new ProfileResponseDto(profile.toObject());
+    response.posts = await this._posts.userPostCount(id);
+    response.followers = await this.followersCount(id);
+    response.following = await this.followingCount(id);
+
+    return response;
   }
 
   async create({ _id, firstName }: User) {
