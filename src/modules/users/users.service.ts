@@ -6,25 +6,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserCreatedEvent } from './events';
 import * as bcrypt from 'bcrypt';
+import { ProfileService } from '@modules/profile';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private _profile: ProfileService,
     private eventEmitter: EventEmitter2,
   ) {}
 
-  /**
-   * "Create a new user and emit a user.created event."
-   *
-   * The first thing we do is create a new user using the data passed in. We then create a new
-   * `UserCreatedEvent` and set the user property to the user we just created. Finally, we emit the
-   * `user.created` event
-   * @param data - `Partial<User>` - This is the data that will be used to create the user.
-   * @returns A promise that resolves to a `UserDocument`
-   */
   async create(data: Partial<User>): Promise<UserDocument> {
     const user = await new this.userModel(data).save();
+    const profile = await this._profile.create(user);
+
+    await this.userModel
+      .updateOne({ _id: user._id }, { profile: profile._id })
+      .exec();
+    user.profile = profile;
 
     if (!user.thirdPartyAuth) {
       const userCreatedEvent = new UserCreatedEvent();

@@ -1,11 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { LocationService } from '@modules/location';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Post, PostDocument } from './schemas';
 
 @Injectable()
 export class PostsService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    private _location: LocationService,
+  ) {}
+
+  async create(owner: string, dto: CreatePostDto): Promise<Post> {
+    if (!(await this._location.cityExists(dto.city))) {
+      throw new BadRequestException(`Not exist city ${dto.city}`);
+    }
+
+    return new this.postModel({ ...dto, owner }).save();
   }
 
   findAll() {

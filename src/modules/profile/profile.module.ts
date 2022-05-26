@@ -10,7 +10,6 @@ import {
   Profile,
   ProfileSchema,
 } from './schemas';
-import { UserCreatedListener } from './listeners/user-created.listener';
 
 @Module({
   imports: [
@@ -21,6 +20,7 @@ import { UserCreatedListener } from './listeners/user-created.listener';
     ]),
   ],
   controllers: [ProfileController],
-  providers: [ProfileService, UserCreatedListener],
+  providers: [ProfileService],
+  exports: [ProfileService],
 })
 export class ProfileModule {}

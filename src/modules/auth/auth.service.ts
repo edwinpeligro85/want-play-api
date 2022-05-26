@@ -36,20 +36,20 @@ export class AuthService {
   async validateUser(
     email: string,
     pwd: string,
-  ): Promise<{ user: Partial<User>; message: HttpException }> {
+  ): Promise<{ user: Partial<User>; exception: HttpException }> {
     const user = await this._user.findOneByEmail(email, true);
 
     if (!user) {
       return {
         user: null,
-        message: new HttpException('User not found', HttpStatus.UNAUTHORIZED),
+        exception: new HttpException('User not found', HttpStatus.UNAUTHORIZED),
       };
     }
 
-    if (!(await bcrypt.compare(pwd, user.password))) {
+    if (!bcrypt.compareSync(pwd, user.password)) {
       return {
         user: null,
-        message: new HttpException(
+        exception: new HttpException(
           'Invalid credentials',
           HttpStatus.UNAUTHORIZED,
         ),
@@ -58,7 +58,7 @@ export class AuthService {
 
     const { password, ...rest } = user.toObject();
 
-    return { user: rest, message: null };
+    return { user: rest, exception: null };
   }
 
   async confirm(token: string): Promise<User> {
@@ -96,7 +96,7 @@ export class AuthService {
   ): Promise<boolean> {
     const user = await this._user.findOne(userId, true);
 
-    if (await bcrypt.compare(password, user.password)) {
+    if (bcrypt.compareSync(password, user.password)) {
       throw new BadRequestException('Invalid change password');
     }
 
@@ -106,7 +106,12 @@ export class AuthService {
   }
 
   createToken(user: User): string {
-    const payload: JwtPayload = { email: user.email, sub: user['_id'] };
+    const payload: JwtPayload = {
+      email: user.email,
+      sub: user['_id'],
+      profileId:
+        typeof user.profile === 'string' ? user.profile : user.profile._id,
+    };
     return this._jwt.sign(payload);
   }
 

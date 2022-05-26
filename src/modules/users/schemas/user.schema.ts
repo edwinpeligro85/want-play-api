@@ -10,7 +10,7 @@ import { Profile } from '@modules/profile/schemas';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User extends TimestampsModel<User> implements IUser {
   get thirdPartyAuth(): boolean {
     return isNotEmpty(this.facebookId);
@@ -48,22 +48,17 @@ export const UserSchema = SchemaFactory.createForClass(User);
 export const UserSchemaProvider = {
   name: User.name,
   useFactory: () => {
-    UserSchema.pre<User>('save', function (next: Function) {
+    const schema = UserSchema;
+
+    schema.pre<User>('save', function (next: Function) {
       const user = this;
+
       if (user.password) {
-        bcrypt.genSalt(10, function (err, salt) {
-          if (err) return next(err);
-
-          bcrypt.hash(user.password, salt, (_, hash) => {
-            if (err) return next(err);
-
-            user.password = hash;
-            next();
-          });
-        });
+        user.password = bcrypt.hashSync(user.password, 10);
+        next();
       }
     });
 
-    return UserSchema;
+    return schema;
   },
 };

@@ -69,4 +69,8 @@ export class LocationService {
 
     return this.cityModel.find().exec();
   }
+
+  async cityExists(_id: string): Promise<boolean> {
+    return (await this.cityModel.exists({ _id }).exec()) !== null;
+  }
 }

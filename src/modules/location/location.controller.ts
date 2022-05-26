@@ -1,3 +1,4 @@
+import { Auth } from '@common/decorators';
 import { IsMongoIdPipe } from '@common/pipes';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -12,6 +13,7 @@ import { City, Country, State } from './schemas';
 export class LocationController {
   constructor(private readonly _location: LocationService) {}
 
+  @Auth()
   @Post('/country')
   createCountry(@Body() createCountryDto: CreateCountryDto): Promise<Country> {
     return this._location.createCountry(createCountryDto);
@@ -29,6 +31,7 @@ export class LocationController {
     return this._location.findAllStates(id);
   }
 
+  @Auth()
   @Post('/state')
   createState(@Body() createStateDto: CreateStateDto): Promise<State> {
     return this._location.createState(createStateDto);
@@ -44,6 +47,7 @@ export class LocationController {
     return this._location.findAllCities(id);
   }
 
+  @Auth()
   @Post('/city')
   createCity(@Body() createCityDto: CreateCityDto): Promise<City> {
     return this._location.createCity(createCityDto);

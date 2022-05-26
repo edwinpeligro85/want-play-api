@@ -1,12 +1,16 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { TimestampsModel } from '@common/schemas';
 import { Gender } from '../enums';
+import { User } from '@modules/users/schemas';
 
 export type ProfileDocument = Profile & Document;
 
 @Schema({ timestamps: true })
 export class Profile extends TimestampsModel<Profile> {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: User;
+
   @Prop({ enum: Object.values(Gender) })
   gender?: Gender;
 
@@ -29,7 +33,7 @@ export class Profile extends TimestampsModel<Profile> {
         link: { type: String },
         name: { type: String },
       },
-    ])
+    ]),
   })
   socialMedias: Record<string, any>[];
 }

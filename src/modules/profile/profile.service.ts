@@ -1,3 +1,4 @@
+import { User } from '@modules/users/schemas';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
@@ -26,10 +27,13 @@ export class ProfileService {
     return this.profileModel.findById(id).exec();
   }
 
-  async create(userName: string) {
+  async create({ _id, firstName }: User) {
     const createdProfile = new this.profileModel({
       age: 0,
-      nickname: `${userName.substring(0, 3)}${Math.floor(Math.random() * (999 + 1 - 0) + 0)}`,
+      user: _id,
+      nickname: `${firstName.substring(0, 3)}${Math.floor(
+        Math.random() * (999 + 1 - 0) + 0,
+      )}`,
       birthDate: new Date(),
       socialMedias: [],
     });
