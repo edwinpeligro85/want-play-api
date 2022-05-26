@@ -6,16 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Post as PostSchema } from './schemas';
+import { Post as PostModel, Post as PostSchema } from './schemas';
 import { Auth, AuthUser } from '@common/decorators';
 import { IUser } from '@interfaces';
+import {
+  CollectionResponse,
+  CollectionValidationPipe,
+} from '@sigmaott/paginate';
+import { PostProperties } from './dto/post-properties.paginate';
+import { IsMongoIdPipe } from '@common/pipes';
 
-@Auth()
+// @Auth()
 @ApiTags('Post')
 @Controller('posts')
 export class PostsController {
@@ -33,22 +40,28 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  findAll(
+    @Query(new CollectionValidationPipe(PostProperties))
+    collectionDto: any,
+  ): Promise<CollectionResponse<PostModel>> {
+    return this.postsService.findAll(collectionDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  findOne(@Param('id', IsMongoIdPipe) id: string): Promise<PostModel> {
+    return this.postsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
+  update(
+    @Param('id', IsMongoIdPipe) id: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<PostModel> {
+    return this.postsService.update(id, updatePostDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
+  remove(@Param('id', IsMongoIdPipe) id: string) {
+    return this.postsService.remove(id);
   }
 }

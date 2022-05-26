@@ -1,5 +1,14 @@
+import {
+  CollectionDto,
+  CollectionResponse,
+  DocumentCollector,
+} from '@sigmaott/paginate';
 import { LocationService } from '@modules/location';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -8,10 +17,16 @@ import { Post, PostDocument } from './schemas';
 
 @Injectable()
 export class PostsService {
+  private modelCollection: DocumentCollector<PostDocument>;
+
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     private _location: LocationService,
   ) {}
+
+  onModuleInit() {
+    this.modelCollection = new DocumentCollector<PostDocument>(this.postModel);
+  }
 
   async create(owner: string, dto: CreatePostDto): Promise<Post> {
     if (!(await this._location.cityExists(dto.city))) {
@@ -21,19 +36,33 @@ export class PostsService {
     return new this.postModel({ ...dto, owner }).save();
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findAll(
+    collectionDto: CollectionDto,
+  ): Promise<CollectionResponse<Post>> {
+    return this.modelCollection.find(collectionDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: string): Promise<Post> {
+    const post = await this.postModel
+      .findById(id)
+      .populate(['city'])
+      .exec();
+
+    if (!post) {
+      throw new NotFoundException(`Not found post ${id}`);
+    }
+
+    return post;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+    delete updatePostDto.city;
+    await this.postModel.findByIdAndUpdate(id, updatePostDto).exec();
+
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: string) {
+    return this.postModel.findByIdAndRemove(id);
   }
 }
