@@ -1,3 +1,4 @@
+import { LocationService } from '@modules/location';
 import { PostsService } from '@modules/posts';
 import { User } from '@modules/users/schemas';
 import {
@@ -28,10 +29,24 @@ export class ProfileService {
     private followingModel: Model<FollowingDocument>,
     @InjectConnection() private connection: Connection,
     private _posts: PostsService,
+    private _location: LocationService,
   ) {}
 
   async findOne(id: string): Promise<ProfileResponseDto> {
-    const profile = await this.profileModel.findById(id).exec();
+    const profile = await this.profileModel
+      .findById(id)
+      .populate({
+        path: 'city',
+        populate: {
+          path: 'state',
+          model: 'State',
+          populate: {
+            path: 'country',
+            model: 'Country',
+          }
+        },
+      })
+      .exec();
 
     if (!profile) {
       throw new NotFoundException(`Profile ${id} not found`);
@@ -67,6 +82,10 @@ export class ProfileService {
         moment(updatedProfile.birthDate),
         'years',
       );
+    }
+
+    if (!(await this._location.cityExists(updatedProfile.city))) {
+      throw new BadRequestException(`Not exist city ${updatedProfile.city}`);
     }
 
     await this.profileModel.updateOne({ _id }, updatedProfile).exec();

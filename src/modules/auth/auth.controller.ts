@@ -1,5 +1,6 @@
 import { Auth, AuthUser } from '@common/decorators';
 import { Environment, IUser } from '@interfaces';
+import { ProfileService } from '@modules/profile';
 import { User } from '@modules/users/schemas';
 import {
   Controller,
@@ -34,6 +35,7 @@ export class AuthController {
   constructor(
     private readonly _auth: AuthService,
     private readonly _config: ConfigService<Environment>,
+    private readonly _profile: ProfileService,
   ) {}
 
   @Post('register')
@@ -53,6 +55,10 @@ export class AuthController {
     @Body() _: LoginDto,
     @AuthUser() user: User,
   ): Promise<LoginResponseDto> {
+    user.profile = await this._profile.findOne(
+      user.profile['_id'] ?? (user.profile as any),
+    );
+
     return this._auth.login(user);
   }
 
@@ -63,6 +69,10 @@ export class AuthController {
   @Auth()
   @Get('me')
   async getMe(@AuthUser() user: IUser): Promise<User> {
+    user.profile = await this._profile.findOne(
+      user.profile['_id'] ?? user.profile,
+    );
+
     return user as User;
   }
 

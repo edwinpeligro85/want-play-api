@@ -109,8 +109,7 @@ export class AuthService {
     const payload: JwtPayload = {
       email: user.email,
       sub: user['_id'],
-      profileId:
-        typeof user.profile === 'string' ? user.profile : user.profile._id,
+      profileId: user.profile['_id'] ?? user.profile as any,
     };
     return this._jwt.sign(payload);
   }

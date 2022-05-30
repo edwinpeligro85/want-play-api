@@ -4,35 +4,39 @@ import {
   IsDate,
   IsDefined,
   IsEnum,
+  IsMongoId,
   IsOptional,
   IsString,
   IsUrl,
   MaxDate,
-  ValidateNested,
 } from 'class-validator';
 import { Gender, SocialMedia as SocialMediaEnum } from '../enums';
 
 export class UpdateProfileDto {
   @IsOptional()
-  gender: Gender;
+  gender?: Gender;
 
   @IsOptional()
   @IsDate()
   @MaxDate(new Date(new Date().setMonth(-(12 * 13))))
   @Transform((attr) => new Date(attr.value))
-  birthDate: Date;
+  birthDate?: Date;
 
   @IsOptional()
   @IsString()
-  aboutMe: string;
+  aboutMe?: string;
 
   @IsOptional()
   @IsString()
-  nickname: string;
+  nickname?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  city: string;
 
   @IsOptional()
   @IsArray()
-  socialMedias: SocialMedia[];
+  socialMedias?: SocialMedia[];
 }
 
 export class SocialMedia {

@@ -13,15 +13,15 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Post as PostModel, Post as PostSchema } from './schemas';
-import { Auth, AuthUser } from '@common/decorators';
+import { ApiCollectionresponse, Auth, AuthUser } from '@common/decorators';
 import { IUser } from '@interfaces';
 import {
   CollectionDto,
-  CollectionResponse,
   ValidationPipe,
 } from '@forlagshuset/nestjs-mongoose-paginate';
 import { PostProperties } from './dto/post-properties.paginate';
 import { IsMongoIdPipe } from '@common/pipes';
+import { CollectionResponseDto } from '@common/dto';
 
 @Auth()
 @ApiTags('Post')
@@ -40,11 +40,12 @@ export class PostsController {
     );
   }
 
+  @ApiCollectionresponse(PostModel)
   @Get()
   findAll(
     @Query(new ValidationPipe(PostProperties))
     collectionDto: CollectionDto,
-  ): Promise<CollectionResponse<PostModel>> {
+  ) {
     return this.postsService.findAll(collectionDto);
   }
 

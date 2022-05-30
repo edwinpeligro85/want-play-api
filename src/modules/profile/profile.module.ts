@@ -11,6 +11,7 @@ import {
   ProfileSchema,
 } from './schemas';
 import { PostsModule } from '@modules/posts';
+import { LocationModule } from '@modules/location';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PostsModule } from '@modules/posts';
       { name: Following.name, schema: FollowingSchema },
     ]),
     PostsModule,
+    LocationModule,
   ],
   controllers: [ProfileController],
   providers: [ProfileService],
