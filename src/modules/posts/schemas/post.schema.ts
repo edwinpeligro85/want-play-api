@@ -1,4 +1,4 @@
-import { Base } from '@common/schemas';
+import { TimestampsModel } from '@common/schemas';
 import { City } from '@modules/location/schemas';
 import { Profile } from '@modules/profile/schemas';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -10,7 +10,7 @@ import { PostRequest } from './post-request.schema';
 export type PostDocument = Post & Document;
 
 @Schema({ timestamps: true })
-export class Post extends Base<Post> {
+export class Post extends TimestampsModel<Post> {
   @Prop({ enum: Object.values(PostStatus), default: PostStatus.OPEN })
   status: PostStatus;
 
@@ -35,6 +35,13 @@ export class Post extends Base<Post> {
 export const PostSchema = SchemaFactory.createForClass(Post);
 
 PostSchema.pre('find', function (next) {
-  this.populate('owner city');
+  this.populate('owner city').populate({
+    path: 'requests',
+    populate: {
+      path: 'owner',
+      model: 'Profile',
+      select: 'nickname',
+    },
+  });
   next();
 });

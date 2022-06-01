@@ -1,4 +1,5 @@
 import { AuthModule } from './auth';
+import { ChatModule } from './chat';
 import { LocationModule } from './location';
 import { PostsModule } from './posts';
 import { ProfileModule } from './profile';
@@ -12,4 +13,5 @@ export const FeatureModules = [
   ProfileModule,
   PostsModule,
   LocationModule,
+  ChatModule,
 ];

@@ -1,5 +1,7 @@
 import { Auth } from '@common/decorators';
 import { IsMongoIdPipe } from '@common/pipes';
+import { ChatService } from '@modules/chat';
+import { Chat } from '@modules/chat/schemas';
 import {
   Body,
   Controller,
@@ -21,7 +23,10 @@ import { Profile } from './schemas';
 @ApiTags('Profile')
 @Controller('profile')
 export class ProfileController {
-  constructor(private readonly _profile: ProfileService) {}
+  constructor(
+    private readonly _profile: ProfileService,
+    private readonly _chat: ChatService,
+  ) {}
 
   @Get(':id')
   findOne(@Param('id', IsMongoIdPipe) id: string): Promise<ProfileResponseDto> {
@@ -52,6 +57,11 @@ export class ProfileController {
   @Get(':id/following_count')
   followingCount(@Param('id', IsMongoIdPipe) id: string): Promise<number> {
     return this._profile.followingCount(id);
+  }
+
+  @Get(':id/chats')
+  findChats(@Param('id', IsMongoIdPipe) id: string): Promise<Chat[]> {
+    return this._chat.getChatByUserId(id);
   }
 
   @Patch(':id')

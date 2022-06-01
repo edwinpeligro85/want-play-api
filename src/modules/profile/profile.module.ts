@@ -12,6 +12,7 @@ import {
 } from './schemas';
 import { PostsModule } from '@modules/posts';
 import { LocationModule } from '@modules/location';
+import { ChatModule } from '@modules/chat';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LocationModule } from '@modules/location';
     ]),
     PostsModule,
     LocationModule,
+    ChatModule,
   ],
   controllers: [ProfileController],
   providers: [ProfileService],

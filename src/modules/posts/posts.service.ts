@@ -13,7 +13,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Post, PostDocument } from './schemas';
+import {
+  Post,
+  PostDocument,
+  PostRequest,
+  PostRequestDocument,
+} from './schemas';
 
 @Injectable()
 export class PostsService {
@@ -21,6 +26,8 @@ export class PostsService {
 
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    @InjectModel(PostRequest.name)
+    private postRequestModel: Model<PostRequestDocument>,
     private _location: LocationService,
   ) {}
 
@@ -68,5 +75,23 @@ export class PostsService {
 
   async userPostCount(owner: string): Promise<number> {
     return this.postModel.count({ owner }).exec();
+  }
+
+  async sendRequest(id: string, owner: string): Promise<PostRequest> {
+    const post = await this.postModel.findById(id).exec();
+
+    if (!post) {
+      throw new NotFoundException(`Not found post ${id}`);
+    }
+
+    const postRequest = await new this.postRequestModel({
+      post: id,
+      owner,
+    }).save();
+
+    post.requests.push(postRequest);
+    post.save();
+
+    return postRequest;
   }
 }

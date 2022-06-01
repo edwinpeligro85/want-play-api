@@ -7,12 +7,13 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Post as PostModel, Post as PostSchema } from './schemas';
+import { Post as PostModel, Post as PostSchema, PostRequest } from './schemas';
 import { ApiCollectionresponse, Auth, AuthUser } from '@common/decorators';
 import { IUser } from '@interfaces';
 import {
@@ -21,7 +22,6 @@ import {
 } from '@forlagshuset/nestjs-mongoose-paginate';
 import { PostProperties } from './dto/post-properties.paginate';
 import { IsMongoIdPipe } from '@common/pipes';
-import { CollectionResponseDto } from '@common/dto';
 
 @Auth()
 @ApiTags('Post')
@@ -65,5 +65,13 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id', IsMongoIdPipe) id: string) {
     return this.postsService.remove(id);
+  }
+
+  @Put(':id/requests/:target')
+  sendRequest(
+    @Param('id', IsMongoIdPipe) id: string,
+    @Param('target', IsMongoIdPipe) owner: string,
+  ): Promise<PostRequest> {
+    return this.postsService.sendRequest(id, owner);
   }
 }
