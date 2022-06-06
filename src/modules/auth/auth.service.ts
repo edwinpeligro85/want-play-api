@@ -15,12 +15,15 @@ import { Status } from '@modules/users/enums';
 import { ChangePasswordDto, ForgotPasswordDto } from './dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FacebookUser, JwtPayload } from './interfaces';
+import { ConfigService } from '@nestjs/config';
+import { JwtEnvironment } from '@interfaces';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly _jwt: JwtService,
     private readonly _user: UsersService,
-    private _jwt: JwtService,
+    private readonly _config: ConfigService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -106,12 +109,30 @@ export class AuthService {
   }
 
   createToken(user: User): string {
-    const payload: JwtPayload = {
+    return this._jwt.sign(this.generateJwtPayload(user));
+  }
+
+  public createCookieRefreshToken(user: User) {
+    const payload = this.generateJwtPayload(user);
+    const refresh = this._config.get<JwtEnvironment>('jwt').refresh;
+    const token = this._jwt.sign(payload, {
+      secret: refresh.secret,
+      expiresIn: refresh.expirationTime,
+    });
+
+    return `Refresh=${token}; HttpOnly; Path=/; Max-Age=604800`;
+  }
+
+  public getCookiesForLogOut() {
+    return ['Refresh=; HttpOnly; Path=/; Max-Age=0'];
+  }
+
+  private generateJwtPayload(user: User): JwtPayload {
+    return {
       email: user.email,
       sub: user['_id'],
-      profileId: user.profile['_id'] ?? user.profile as any,
+      profileId: user.profile['_id'] ?? (user.profile as any),
     };
-    return this._jwt.sign(payload);
   }
 
   public async verifyToken(token: string): Promise<JwtPayload> {

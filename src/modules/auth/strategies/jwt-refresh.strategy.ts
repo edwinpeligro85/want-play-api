@@ -5,17 +5,25 @@ import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { UsersService } from '@modules/users';
 import { Environment, JwtEnvironment } from '@interfaces';
+import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor(
     private _config: ConfigService<Environment>,
     private readonly _user: UsersService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: _config.get<JwtEnvironment>('jwt').access.secret,
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.Refresh;
+        },
+      ]),
+      passReqToCallback: true,
+      secretOrKey: _config.get<JwtEnvironment>('jwt').refresh.secret,
     });
   }
 

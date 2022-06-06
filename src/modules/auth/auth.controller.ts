@@ -13,10 +13,11 @@ import {
   Patch,
   HttpStatus,
   Res,
+  Req,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
@@ -26,7 +27,7 @@ import {
   LoginResponseDto,
   SignUpDto,
 } from './dto';
-import { FacebookAuthGuard, LocalAuthGuard } from './guards';
+import { FacebookAuthGuard, JwtRefreshGuard, LocalAuthGuard } from './guards';
 import { FacebookPayload } from './interfaces';
 
 @ApiTags('Auth')
@@ -54,12 +55,36 @@ export class AuthController {
   async login(
     @Body() _: LoginDto,
     @AuthUser() user: User,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResponseDto> {
     user.profile = await this._profile.findOne(
       user.profile['_id'] ?? (user.profile as any),
     );
 
+    res.setHeader('Set-Cookie', this._auth.createCookieRefreshToken(user));
+
     return this._auth.login(user);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshGuard)
+  async refresh(
+    @Res() res: Response,
+    @AuthUser() user: User,
+  ): Promise<LoginResponseDto> {
+    const accessToken = this._auth.createToken(user);
+
+    res.setHeader('Set-Cookie', this._auth.createCookieRefreshToken(user));
+
+    return new LoginResponseDto(accessToken, user);
+  }
+
+  @Auth()
+  @Post('logout')
+  async logOut(@Res({ passthrough: true }) res: Response, @AuthUser() user: User) {
+    res.setHeader('Set-Cookie', this._auth.getCookiesForLogOut());
+
+    return user;
   }
 
   /**

@@ -1,14 +1,14 @@
 export interface Environment {
+  jwt: JwtEnvironment;
   port: number;
-  apiPrefix: string;
-  production: boolean;
-  jwtSecret: string;
-  clientAppUrl: string;
-  database: DataBaseEnvironment;
-  mailer: MailerEnvironment;
+  auth: AuthEnvironment;
   appUrl: string;
   assets: string;
-  auth: AuthEnvironment;
+  mailer: MailerEnvironment;
+  database: DataBaseEnvironment;
+  apiPrefix: string;
+  production: boolean;
+  clientAppUrl: string;
 }
 
 export interface DataBaseEnvironment {
@@ -16,6 +16,16 @@ export interface DataBaseEnvironment {
   name: string;
   username: string;
   password: string;
+}
+
+export interface JwtEnvironment {
+  access: JwtTokenValues;
+  refresh: JwtTokenValues;
+}
+
+interface JwtTokenValues {
+  secret: string;
+  expirationTime: string;
 }
 
 export interface MailerEnvironment {
